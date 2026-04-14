@@ -177,7 +177,7 @@ const CardsListPage: React.FC = () => {
           )}
 
           {cards.map(card => (
-            <IonCard key={card.id} button onClick={() => history.push(`/cards/${card.id}`)}>
+            <IonCard key={card.id} button onClick={() => history.push(`/cards/details/${card.id}`)}>
               <IonCardContent>
                 <div className="card-row">
                   <h2>{card.name}</h2>

@@ -19,54 +19,6 @@ import type { Card, CardGame, CardInput } from '../types/card';
 
 const CARDS_COLLECTION = 'cards';
 
-const sampleCards: CardInput[] = [
-  {
-    name: 'Charizard',
-    game: 'Pokemon',
-    rarity: 'Holo Rare',
-    condition: 'Near Mint',
-    price: 899.9,
-    imageUrl: '',
-    description: 'Carta classica do Base Set para demonstracao do prototipo.',
-  },
-  {
-    name: 'Pikachu',
-    game: 'Pokemon',
-    rarity: 'Common',
-    condition: 'Good',
-    price: 59.9,
-    imageUrl: '',
-    description: 'Carta iconica para testes de busca e filtro.',
-  },
-  {
-    name: 'Mewtwo',
-    game: 'Pokemon',
-    rarity: 'Holo Rare',
-    condition: 'Excellent',
-    price: 699.9,
-    imageUrl: '',
-    description: 'Carta de alto valor para demonstracao de ordenacao por preco.',
-  },
-  {
-    name: 'Black Lotus',
-    game: 'Magic: The Gathering',
-    rarity: 'Rare',
-    condition: 'Near Mint',
-    price: 2500,
-    imageUrl: '',
-    description: 'Carta lendaria de Magic para o prototipo.',
-  },
-  {
-    name: 'Dark Magician',
-    game: 'Yu-Gi-Oh!',
-    rarity: 'Ultra Rare',
-    condition: 'Good',
-    price: 450,
-    imageUrl: '',
-    description: 'Carta classica de Yu-Gi-Oh para testes do app.',
-  },
-];
-
 function ensureFirebaseConfigured() {
   if (!isFirebaseConfigured) {
     throw new Error('Firebase nao configurado. Preencha o arquivo .env com VITE_FIREBASE_*');
@@ -175,28 +127,4 @@ export async function deleteCard(cardId: string): Promise<void> {
 
   const cardRef = doc(db, CARDS_COLLECTION, cardId);
   await deleteDoc(cardRef);
-}
-
-export async function seedSampleCards(): Promise<number> {
-  ensureFirebaseConfigured();
-
-  const existingCards = await listAllCards();
-  if (existingCards.length > 0) {
-    return 0;
-  }
-
-  const cardsRef = collection(db, CARDS_COLLECTION);
-
-  await Promise.all(
-    sampleCards.map(card =>
-      addDoc(cardsRef, {
-        ...card,
-        nameLower: card.name.trim().toLowerCase(),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      })
-    )
-  );
-
-  return sampleCards.length;
 }

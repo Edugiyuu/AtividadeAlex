@@ -23,11 +23,12 @@ import {
   IonToast,
   IonToolbar,
 } from '@ionic/react';
-import type { RefresherEventDetail } from '@ionic/react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { add } from 'ionicons/icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { auth } from '../services/firebase';
 import type { Card, CardGame } from '../types/card';
 import { filterCardsByGame, listAllCards, searchCardsByName } from '../services/cardService';
 import './cards.css';
@@ -87,7 +88,7 @@ const CardsListPage: React.FC = () => {
 
       setCards(sortCards(data, sortMode));
     } catch (error) {
-      setToastMessage(error instanceof Error ? error.message : 'Erro ao carregar cards');
+      setToastMessage('Erro ao carregar cards');
     } finally {
       setLoading(false);
     }
@@ -96,6 +97,16 @@ const CardsListPage: React.FC = () => {
   useEffect(() => {
     loadCards();
   }, [loadCards]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (!user) {
+        history.replace('/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [history]);
 
   const readMode = useMemo(() => {
     if (searchText.trim()) {
@@ -109,7 +120,7 @@ const CardsListPage: React.FC = () => {
     return 'READ: listagem geral';
   }, [gameFilter, searchText]);
 
-  const onRefresh = async (event: CustomEvent<RefresherEventDetail>) => {
+  const onRefresh = async (event: any) => {
     await loadCards();
     event.detail.complete();
   };
@@ -138,7 +149,7 @@ const CardsListPage: React.FC = () => {
             <IonSelect
               value={gameFilter}
               interface="action-sheet"
-              onIonChange={event => setGameFilter(event.detail.value as 'all' | CardGame)}
+              onIonChange={event => setGameFilter(event.detail.value)}
             >
               {gameOptions.map(option => (
                 <IonSelectOption key={option} value={option}>

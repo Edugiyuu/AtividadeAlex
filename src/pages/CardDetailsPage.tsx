@@ -18,9 +18,11 @@ import {
   IonToast,
   IonToolbar,
 } from '@ionic/react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
+import { auth } from '../services/firebase';
 import type { Card } from '../types/card';
 import { deleteCard, getCardById } from '../services/cardService';
 import './cards.css';
@@ -37,6 +39,7 @@ const CardDetailsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [currentUserId, setCurrentUserId] = useState('');
 
   useEffect(() => {
     const loadCard = async () => {
@@ -54,7 +57,25 @@ const CardDetailsPage: React.FC = () => {
     loadCard();
   }, [id]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (!user) {
+        history.replace('/login');
+        return;
+      }
+
+      setCurrentUserId(user.uid);
+    });
+
+    return () => unsubscribe();
+  }, [history]);
+
   const handleDelete = async () => {
+    if (card?.ownerId && card.ownerId !== currentUserId) {
+      setToastMessage('Voce nao pode excluir esta carta.');
+      return;
+    }
+
     setLoading(true);
     try {
       await deleteCard(id);
@@ -106,12 +127,24 @@ const CardDetailsPage: React.FC = () => {
               </IonLabel>
             </IonItem>
 
-            <IonButton expand="block" onClick={() => history.push(`/cards/edit/${card.id}`)}>
-              Editar carta
-            </IonButton>
-            <IonButton expand="block" color="danger" fill="outline" onClick={() => setShowDeleteAlert(true)}>
-              Excluir carta
-            </IonButton>
+            {(!card.ownerId || card.ownerId === currentUserId) && (
+              <IonButton expand="block" onClick={() => history.push(`/cards/edit/${card.id}`)}>
+                Editar carta
+              </IonButton>
+            )}
+            {(!card.ownerId || card.ownerId === currentUserId) && (
+              <IonButton
+                expand="block"
+                color="danger"
+                fill="outline"
+                onClick={() => setShowDeleteAlert(true)}
+              >
+                Excluir carta
+              </IonButton>
+            )}
+            {card.ownerId && card.ownerId !== currentUserId && (
+              <IonText color="medium">Somente o dono pode editar ou excluir.</IonText>
+            )}
           </div>
         )}
 

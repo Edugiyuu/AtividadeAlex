@@ -10,8 +10,11 @@ export interface Card {
   price: number;
   imageUrl?: string;
   description: string;
+  ownerId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export type CardInput = Omit<Card, 'id' | 'nameLower' | 'createdAt' | 'updatedAt'>;
+export type CardInput = Omit<Card, 'id' | 'nameLower' | 'createdAt' | 'updatedAt' | 'ownerId'> & {
+  ownerId?: string;
+};

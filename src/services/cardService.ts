@@ -36,6 +36,7 @@ function mapCard(docId: string, data: Record<string, any>): Card {
     price: Number(data.price || 0),
     imageUrl: data.imageUrl || '',
     description: data.description || '',
+    ownerId: data.ownerId || '',
     createdAt: data.createdAt?.toDate?.()?.toISOString(),
     updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
   };
@@ -102,6 +103,7 @@ export async function createCard(payload: CardInput): Promise<void> {
 
   await addDoc(cardsRef, {
     ...payload,
+    ownerId: payload.ownerId || '',
     nameLower: payload.name.trim().toLowerCase(),
     price: Number(payload.price),
     createdAt: serverTimestamp(),

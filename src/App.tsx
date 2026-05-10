@@ -5,6 +5,8 @@ import Home from './pages/Home';
 import CardsListPage from './pages/CardsListPage';
 import CardFormPage from './pages/CardFormPage';
 import CardDetailsPage from './pages/CardDetailsPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -42,6 +44,12 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
+        <Route exact path="/login">
+          <LoginPage />
+        </Route>
+        <Route exact path="/register">
+          <RegisterPage />
+        </Route>
         <Route exact path="/home">
           <Home />
         </Route>

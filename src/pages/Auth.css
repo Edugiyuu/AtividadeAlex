@@ -1,0 +1,26 @@
+.auth-wrapper {
+  max-width: 420px;
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+
+.auth-card {
+  box-shadow: var(--ion-box-shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
+}
+
+.auth-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-provider {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-subtle {
+  text-align: center;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}

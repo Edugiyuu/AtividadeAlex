@@ -16,9 +16,11 @@ import {
   IonToast,
   IonToolbar,
 } from '@ionic/react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
+import { auth } from '../services/firebase';
 import type { CardGame, CardInput } from '../types/card';
 import { createCard, getCardById, updateCard } from '../services/cardService';
 import './cards.css';
@@ -47,6 +49,7 @@ const CardFormPage: React.FC = () => {
   const [formData, setFormData] = useState<CardInput>(initialForm);
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [currentUserId, setCurrentUserId] = useState('');
 
   useEffect(() => {
     const loadCard = async () => {
@@ -60,6 +63,12 @@ const CardFormPage: React.FC = () => {
 
         if (!card) {
           setToastMessage('Carta nao encontrada para edicao.');
+          history.replace('/cards');
+          return;
+        }
+
+        if (card.ownerId && card.ownerId !== currentUserId) {
+          setToastMessage('Voce nao pode editar esta carta.');
           history.replace('/cards');
           return;
         }
@@ -82,6 +91,19 @@ const CardFormPage: React.FC = () => {
 
     loadCard();
   }, [history, id, isEditing]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (!user) {
+        history.replace('/login');
+        return;
+      }
+
+      setCurrentUserId(user.uid);
+    });
+
+    return () => unsubscribe();
+  }, [history]);
 
   const updateField = (field: keyof CardInput, value: string | number) => {
     setFormData(prev => ({
@@ -110,7 +132,12 @@ const CardFormPage: React.FC = () => {
         await updateCard(id, { ...formData, price: Number(formData.price) });
         setToastMessage('Carta atualizada com sucesso!');
       } else {
-        await createCard({ ...formData, price: Number(formData.price) });
+        if (!currentUserId) {
+          setToastMessage('Usuario nao autenticado.');
+          return;
+        }
+
+        await createCard({ ...formData, price: Number(formData.price), ownerId: currentUserId });
         setToastMessage('Carta criada com sucesso!');
       }
 
